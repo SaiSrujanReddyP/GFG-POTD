@@ -1,36 +1,54 @@
-	public:
-	vector<int> maximumWeight(int n, vector<vector<int>> edges, int q, vector<int> &queries)
-	{
-		ans = 0;
-		vector<int> parent(n+1, 0), sz(n+1, 0);
-		for(int i = 0;i <= n; i++)
-		{
+class Solution {
+    int ans;
+    private int root(int i, int[] parent) {
+        while (parent[i] != i) {
+            parent[i] = parent[parent[i]];
+            i = parent[i];
+        }
+        return i;
+    }
+    private int Union(int a, int b, int[] parent, int[] sz) {
+        int ra = root(a, parent);
+        int rb = root(b, parent);
+        if (ra == rb)
+            return sz[ra] * sz[ra];
+        if (sz[ra] < sz[rb]) {
+            int temp = ra;
+            ra = rb;
+            rb = temp;
+            temp = a;
+            a = b;
+            b = temp;
+        }
+        ans += sz[ra] * sz[rb];
+        parent[rb] = ra;
+        sz[ra] += sz[rb];
+        return ans;
+    }
+    ArrayList<Integer> maximumWeight(int n, int[][] edges, int q, int[] queries) {
+        ans = 0;
+        int[] parent = new int[n + 1];
+        int[] sz = new int[n + 1];
+        Arrays.fill(sz, 1);
+        for (int i = 0; i <= n; i++) {
             parent[i] = i;
-            sz[i] = 1;
         }
-        vector<pair<int, pair<int, int>>> wt;
-       	for(int i = 0; i < n-1; i++)
-           	wt.push_back({edges[i][2] , {edges[i][0], edges[i][1]}}); 
-        sort(wt.begin() , wt.end());
-        map<int, int> mp;
-        for(int i = 0;i < n-1; i++){
-            int a = wt[i].first;
-            int b = wt[i].second.first;
-            int c = wt[i].second.second;
-            mp[a] = Union(b, c, parent, sz);  
+        NavigableMap<Integer, Integer> mp = new TreeMap<>();
+        Arrays.sort(edges, (a, b) -> Integer.compare(a[2], b[2]));
+        for (int i = 0; i < n - 1; i++) {
+            int a = edges[i][0];
+            int b = edges[i][1];
+            int c = edges[i][2];
+            mp.put(c, Union(a, b, parent, sz));
         }
-        vector<int> res;
-        for(int i = 0; i < q; i++)
-        {
-           	auto val = mp.upper_bound(queries[i]);
-            if(val == mp.begin())
-                res.push_back(0);
+        ArrayList<Integer> res = new ArrayList<>();
+        for (int query : queries) {
+            Map.Entry<Integer, Integer> entry = mp.floorEntry(query);
+            if (entry == null)
+                res.add(0); 
             else
-            {
-                val--;
-                res.push_back(val->second); 
-            }
-       	}
-       	return res;
-	}
-};
+                res.add(entry.getValue()); 
+        }
+        return res;
+    }
+}
