@@ -1,2 +1,2 @@
-#######                                                                                           GFG POTD SOLUTIONS
+#                                                                                  GFG POTD SOLUTIONS
 
